@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>正念冥想空间 纯净极细单向全屏波纹版</title>
+    <link rel="stylesheet" href="meditation_style.css">
+</head>
+<body>
+
+    <!-- 全局悬浮返回按钮 -->
+    <div class="global-back-btn" onclick="triggerExitConfirmation()">〈 离开空间</div>
+
+    <!-- 原生音频播放标签 -->
+    <audio id="bg-audio" loop></audio>
+
+    <!-- ================= 阶段一：声音岛屿选择 ================= -->
+    <div class="med-container active" id="scene-1">
+        <div class="med-header">
+            <h2>寻找你当下的听觉共鸣</h2>
+            <p>挑选一个你想去的小岛，让心先住下来。</p>
+        </div>
+
+        <div class="island-grid">
+            <div class="island-bubble" id="bubble-wave" onclick="selectIsland('wave')">
+                <span class="island-emoji">🌊</span>
+                <span class="island-name">潮汐之岛</span>
+            </div>
+            <div class="island-bubble" id="bubble-fire" onclick="selectIsland('fire')">
+                <span class="island-emoji">🔥</span>
+                <span class="island-name">篝火之岛</span>
+            </div>
+            <div class="island-bubble" id="bubble-rain" onclick="selectIsland('rain')">
+                <span class="island-emoji">🍃</span>
+                <span class="island-name">听雨之岛</span>
+            </div>
+            <div class="island-bubble" id="bubble-bowl" onclick="selectIsland('bowl')">
+                <span class="island-emoji">🪐</span>
+                <span class="island-name">颂钵之岛</span>
+            </div>
+        </div>
+
+        <button class="med-btn disabled" id="start-med-btn" disabled onclick="enterScene2()">登岛冥想</button>
+    </div>
+
+    <!-- ================= 阶段二：正念沉浸冥想 ================= -->
+    <div class="med-container-fullscreen" id="scene-2">
+        
+        <!-- 右上角单纯时间显示器 -->
+        <div class="timer-control-center">
+            <div class="timer-pill-btn-readonly">
+                <span class="timer-icon">⏳</span>
+                <span id="med-timer">01:00</span>
+            </div>
+        </div>
+
+        <!-- 全屏主画布 -->
+        <canvas id="meditation-canvas"></canvas>
+
+        <!-- 核心中心触控球 -->
+        <div class="meditation-core-zone">
+            <div class="resonance-ball" id="main-ball" 
+                 onmousedown="handleBallPressStart(event)" onmouseup="handleBallPressEnd()" onmouseleave="handleBallPressEnd()"
+                 ontouchstart="handleBallPressStart(event)" ontouchend="handleBallPressEnd()">
+                <span id="ball-center-text">连接</span>
+            </div>
+        </div>
+
+        <!-- 底部模式分流面板 -->
+        <div class="med-control-panel" id="control-panel">
+            <p class="med-tip-text" id="med-prompt">选择你的冥想姿态：</p>
+            <div class="med-mode-toggle">
+                <button class="mode-btn active" id="mode-a-btn" onclick="switchMode('A')">👆 指尖锚定 (长按)</button>
+                <button class="mode-btn" id="mode-b-btn" onclick="switchMode('B')">🍃 彻底放空 (发呆)</button>
+            </div>
+        </div>
+
+        <!-- 【启程确认】遮罩面板 -->
+        <div class="med-modal-overlay active-flex" id="start-confirm-overlay">
+            <div class="med-confirm-card">
+                <div class="confirm-decoration-leaf">🍃</div>
+                <h3 id="confirm-island-title">准备进入正念空间</h3>
+                
+                <div class="confirm-time-selector-row">
+                    <p class="selector-label">选择冥想时长：</p>
+                    <div class="confirm-time-options-grid">
+                        <div class="confirm-time-opt active" onclick="changeMeditationTimeDirect(1, this)">1min</div>
+                        <div class="confirm-time-opt" onclick="changeMeditationTimeDirect(5, this)">5min</div>
+                        <div class="confirm-time-opt" onclick="changeMeditationTimeDirect(10, this)">10min</div>
+                        <div class="confirm-time-opt" onclick="changeMeditationTimeDirect(20, this)">20min</div>
+                        <div class="confirm-time-opt" onclick="changeMeditationTimeDirect(30, this)">30min</div>
+                        <div class="confirm-time-opt" onclick="changeMeditationTimeDirect(60, this)">60min</div>
+                    </div>
+                </div>
+
+                <p class="confirm-desc-text">请调整坐姿，尽量让身体保持舒适。准备好后，点击下方按钮开启疗愈之旅。</p>
+                <button class="med-btn" style="margin-top:10px;" id="real-trigger-play-btn" onclick="confirmAndStartMeditation()">开启正念</button>
+            </div>
+        </div>
+
+        <!-- 中断正念确认遮罩面板 -->
+        <div class="med-modal-overlay" id="exit-confirm-overlay">
+            <div class="med-confirm-card">
+                <div class="confirm-decoration-leaf" style="color: #be123c;">⏳</div>
+                <h3>正念正在进行中</h3>
+                <p class="confirm-desc-text" style="color: #64748b;">当下的沉浸来之不易，浮躁的想法总会拉扯我们。确定要提前中断这场心灵疗愈吗？</p>
+                <div class="confirm-btn-row">
+                    <button class="confirm-sub-btn cancel-btn" onclick="cancelExitAndResume()">继续保持</button>
+                    <button class="confirm-sub-btn secure-exit-btn" onclick="secureExitMeditation()">确认离开</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= 阶段三：今日能量留白 ================= -->
+    <div class="med-container" id="scene-3">
+        <div class="letter-overlay">
+            <div class="letter-box" onclick="openLetter(this)">
+                <div class="envelope-top"></div>
+                <div class="letter-preview">💌 展开宇宙的悄悄话</div>
+                <div class="letter-content">
+                    <h3>给亲爱的旅人：</h3>
+                    <p id="universe-words">正在为你拆开内心的信件...</p>
+                    <button class="med-btn" style="margin-top:30px;" onclick="window.location.href='index.html'">带走力量</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🛠️ 铁壁防御第一层：锁死四大岛屿原生中文字符绝对路径映射库
+        const ABSOLUTE_ASSETS_HUB = {
+            wave: { audio: "素材/潮汐.mp3", name: "潮汐之岛" },
+            fire: { audio: "素材/篝火.mp3", name: "篝火之岛" },
+            rain: { audio: "素材/听雨.mp3", name: "避雨之岛" },
+            bowl: { audio: "素材/钵体.mp3", name: "颂钵之岛" }
+        };
+
+        const ISLAND_THEME_MAP = {
+            wave: { key: 'wave', cssClass: 'theme-island-wave' },
+            fire: { key: 'fire', cssClass: 'theme-island-fire' },
+            rain: { key: 'rain', cssClass: 'theme-island-rain' },
+            bowl: { key: 'bowl', cssClass: 'theme-island-bowl' }
+        };
+
+        const UNIVERSE_MESSAGES = [
+            "允许自己偶尔的停滞和无能为力，那是你灵魂在偷偷休息。",
+            "你不需要随时随地保持正确和完美，更不需要随时随地保持坚强。",
+            "轻舟已过万重山，那些你曾以为跨不过去的坎，如今都成了风景。",
+            "把今天所有的兵荒马乱都留在身后吧，此时此刻，就这样静静地坐着，闭上眼睛，深呼吸。",
+        ];
+
+        let selectedIslandKey = null; let currentMode = 'A'; let isPressingBall = false; let medCountdownTimer = null; 
+        let defaultMinutes = 1; let timeLeft = 60; let isMeditationStarted = false; let isClockPaused = false;
+        let mainCanvas = null; let mainCtx = null; let starParticles = []; let rippleRingsArray = []; let canvasAnimationId = null;
+
+        function selectIsland(key) {
+            selectedIslandKey = key;
+            document.querySelectorAll('.island-bubble').forEach(b => b.classList.remove('selected'));
+            document.getElementById(`bubble-${key}`).classList.add('selected');
+            const btn = document.getElementById('start-med-btn'); btn.removeAttribute('disabled'); btn.classList.remove('disabled');
+            
+            // 🛠️ 铁壁防御第二层：用户在第一页刚点中岛屿时，就立刻在后台静默预加载音频资源，斩断延迟
+            const audio = document.getElementById('bg-audio');
+            audio.src = ABSOLUTE_ASSETS_HUB[key].audio;
+            audio.load(); 
+        }
+
+        function enterScene2() {
+            const themeConfig = ISLAND_THEME_MAP[selectedIslandKey];
+            const scene2 = document.getElementById('scene-2');
+            
+            document.body.className = themeConfig.cssClass;
+            timeLeft = defaultMinutes * 60; 
+            updateTimerDisplay();
+
+            document.getElementById('confirm-island-title').innerText = `准备进入 ${ABSOLUTE_ASSETS_HUB[selectedIslandKey].name}`;
+            document.getElementById('start-confirm-overlay').classList.add('active-flex');
+            document.getElementById('exit-confirm-overlay').classList.remove('active-flex');
+
+            isMeditationStarted = false;
+            isClockPaused = false;
+
+            initCanvasEngine(themeConfig.key);
+            switchMode('A');
+            document.getElementById('scene-1').classList.remove('active');
+            scene2.classList.add('active');
+        }
+
+        function changeMeditationTimeDirect(minutes, element) {
+            defaultMinutes = minutes;
+            timeLeft = minutes * 60;
+            updateTimerDisplay();
+            document.querySelectorAll('.confirm-time-opt').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        // 🛠️ 铁壁防御第三层：终极高可靠点击解锁重连算法
+        function confirmAndStartMeditation() {
+            document.getElementById('start-confirm-overlay').classList.remove('active-flex');
+            isMeditationStarted = true;
+
+            const themeConfig = ISLAND_THEME_MAP[selectedIslandKey];
+            const audio = document.getElementById('bg-audio');
+
+            // 1. 读取变量路径
+            const currentComputedStyle = getComputedStyle(document.documentElement);
+            let audioUrl = currentComputedStyle.getPropertyValue(`--${themeConfig.key}-audio-src`).trim().replace(/['"]/g, '');
+            
+            // 2. 交叉验证路径：如果为空，立刻用硬编码路径顶上
+            if (!audioUrl || audioUrl === '') {
+                audioUrl = ABSOLUTE_ASSETS_HUB[selectedIslandKey].audio;
+            }
+
+            // 3. 强行建立音轨绑定
+            audio.src = audioUrl; 
+            audio.volume = 0;
+            
+            // 4. 建立万无一失的自愈容错捕获器
+            let playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // 成功出声，线性柔和拉高音量
+                    fadeAudioIn(audio, 2200);
+                }).catch(error => {
+                    console.log("遇到特殊环境拦截，正在执行无缝二次重连重启...");
+                    // 兜底补救：如果刚才因为路径或者格式报错了，强制重置音轨格式重新注入，彻底击穿异常
+                    audio.src = ABSOLUTE_ASSETS_HUB[selectedIslandKey].audio;
+                    audio.load();
+                    audio.play().then(() => { fadeAudioIn(audio, 2200); });
+                });
+            }
+
+            if (currentMode === 'B') {
+                startMeditationClock();
+            }
+        }
+
+        function triggerExitConfirmation() {
+            if (!isMeditationStarted) { secureExitMeditation(); return; }
+            isClockPaused = true;
+            document.getElementById('exit-confirm-overlay').classList.add('active-flex');
+        }
+
+        function cancelExitAndResume() {
+            document.getElementById('exit-confirm-overlay').classList.remove('active-flex');
+            isClockPaused = false;
+        }
+
+        function secureExitMeditation() {
+            if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+            const audio = document.getElementById('bg-audio');
+            audio.pause(); audio.src = ''; document.body.className = '';
+            document.getElementById('exit-confirm-overlay').classList.remove('active-flex');
+            window.location.href = 'index.html';
+        }
+
+        function updateTimerDisplay() {
+            const timerDiv = document.getElementById('med-timer');
+            let min = Math.floor(timeLeft / 60); let sec = timeLeft % 60;
+            timerDiv.innerText = `${min < 10 ? '0'+min : min}:${sec < 10 ? '0'+sec : sec}`;
+        }
+
+        function initCanvasEngine(islandKey) {
+            mainCanvas = document.getElementById('meditation-canvas'); mainCtx = mainCanvas.getContext('2d');
+            resizeCanvas();
+            const currentComputedStyle = getComputedStyle(document.documentElement);
+            const particleCount = parseInt(currentComputedStyle.getPropertyValue('--particles-total-count')) || 120;
+            
+            starParticles = [];
+            for(let i = 0; i < particleCount; i++) {
+                starParticles.push({
+                    x: Math.random() * mainCanvas.width, y: Math.random() * mainCanvas.height,
+                    size: Math.random() * 1.8 + 1.2, opacity: Math.random() * 0.4 + 0.1,
+                    speedY: (Math.random() * 0.12 + 0.04), speedX: (Math.random() * 0.08 - 0.04)
+                });
+            }
+
+            rippleRingsArray = [];
+            const stepDistance = parseFloat(currentComputedStyle.getPropertyValue('--rings-空气感-space-gap')) || 80;
+            for(let i = 0; i < 7; i++) { rippleRingsArray.push({ radius: 65 + (i * stepDistance) }); }
+            if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId);
+            animateLoop(islandKey);
+        }
+
+        function resizeCanvas() { if(mainCanvas) { mainCanvas.width = window.innerWidth; mainCanvas.height = window.innerHeight; } }
+
+        function animateLoop(islandKey) {
+            mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+            const centerX = mainCanvas.width / 2; const centerY = mainCanvas.height / 2;
+            const maxRadius = Math.sqrt(centerX * centerX + centerY * centerY);
+            let shouldMove = isMeditationStarted && !isClockPaused && ((currentMode === 'B') || (currentMode === 'A' && isPressingBall));
+            const currentComputedStyle = getComputedStyle(document.documentElement);
+            const configuredSpeed = parseFloat(currentComputedStyle.getPropertyValue(`--${islandKey}-wave-speed-step`)) || 0.28;
+            const particleColor = currentComputedStyle.getPropertyValue(`--${islandKey}-particles-color-base`).trim() || 'rgba(14, 165, 233, Opacity)';
+
+            starParticles.forEach(p => {
+                if (shouldMove) { p.y += p.speedY; p.x += p.speedX; }
+                if (p.y > mainCanvas.height) { p.y = 0; p.x = Math.random() * mainCanvas.width; }
+                mainCtx.beginPath(); mainCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                mainCtx.fillStyle = particleColor.replace('Opacity', shouldMove ? p.opacity * 1.5 : p.opacity);
+                mainCtx.fill();
+            });
+
+            const ringThickness = parseFloat(currentComputedStyle.getPropertyValue('--rings-线条大小-thickness')) || 1;
+            rippleRingsArray.forEach((ring, index) => {
+                if (shouldMove) { ring.radius += configuredSpeed; } else { if (ring.radius > 65 && isMeditationStarted && !isClockPaused) ring.radius += 0.03; }
+                if (ring.radius > maxRadius) { ring.radius = 65; }
+                if (ring.radius > 65) {
+                    mainCtx.beginPath(); mainCtx.arc(centerX, centerY, ring.radius, 0, Math.PI * 2);
+                    mainCtx.lineWidth = ringThickness; 
+                    let fadeFactor = 1 - (ring.radius / maxRadius);
+                    let finalOpacity = Math.max(fadeFactor * 0.42, 0.04);
+                    let ringColorPattern = currentComputedStyle.getPropertyValue(`--${islandKey}-ring-layer-${index + 1}`).trim();
+                    if(!ringColorPattern) ringColorPattern = 'rgba(14, 165, 233, Opacity)';
+                    mainCtx.strokeStyle = ringColorPattern.replace('Opacity', finalOpacity);
+                    mainCtx.stroke();
+                }
+            });
+            canvasAnimationId = requestAnimationFrame(() => animateLoop(islandKey));
+        }
+
+        function switchMode(mode) {
+            currentMode = mode; const ball = document.getElementById('main-ball'); const centerText = document.getElementById('ball-center-text'); const prompt = document.getElementById('med-prompt');
+            clearInterval(medCountdownTimer); medCountdownTimer = null; ball.className = "resonance-ball";
+            document.getElementById('mode-a-btn').classList.remove('active'); document.getElementById('mode-b-btn').classList.remove('active');
+            document.getElementById('control-panel').style.opacity = '1'; document.querySelector('.global-back-btn').style.opacity = '1'; document.querySelector('.timer-control-center').style.opacity = '1';
+            
+            if(isMeditationStarted) { timeLeft = defaultMinutes * 60; updateTimerDisplay(); }
+            if(mode === 'A') {
+                document.getElementById('mode-a-btn').classList.add('active'); centerText.innerText = "按住"; prompt.innerText = "请轻轻把手指放在共鸣球上，感受音律震颤：";
+            } else {
+                document.getElementById('mode-b-btn').classList.add('active'); centerText.innerText = "放空"; prompt.innerText = "无需任何操作，闭上双眼，聆听自然...🍃";
+                ball.classList.add('mode-b-breathing'); if(isMeditationStarted) startMeditationClock();
+            }
+        }
+
+        function handleBallPressStart(e) { e.preventDefault(); if(!isMeditationStarted || currentMode !== 'A') return; isPressingBall = true; document.getElementById('ball-center-text').innerText = "呼吸"; document.getElementById('main-ball').classList.add('pressed'); if (navigator.vibrate) navigator.vibrate([25, 80]); startMeditationClock(); }
+        function handleBallPressEnd() { if(currentMode !== 'A' || !isPressingBall) return; isPressingBall = false; document.getElementById('main-ball').classList.remove('pressed'); if (timeLeft > 0 && timeLeft < defaultMinutes * 60) { clearInterval(medCountdownTimer); medCountdownTimer = null; timeLeft = defaultMinutes * 60; updateTimerDisplay(); document.getElementById('ball-center-text').innerText = "重来"; document.getElementById('med-prompt').innerText = "心神分散了，请【重新按住】共鸣球开始疗愈..."; } }
+        
+        function startMeditationClock() { 
+            if (medCountdownTimer) clearInterval(medCountdownTimer); 
+            medCountdownTimer = setInterval(() => { 
+                if (!isMeditationStarted || isClockPaused) return;
+                if (currentMode === 'A' && !isPressingBall) { clearInterval(medCountdownTimer); medCountdownTimer = null; return; } 
+                timeLeft--; updateTimerDisplay();
+                if(currentMode === 'B' && timeLeft === (defaultMinutes * 60 - 5)) { 
+                    document.getElementById('control-panel').style.opacity = '0.01'; document.querySelector('.global-back-btn').style.opacity = '0.01'; document.querySelector('.timer-control-center').style.opacity = '0.15';
+                } 
+                if(timeLeft <= 0) { clearInterval(medCountdownTimer); medCountdownTimer = null; if (canvasAnimationId) cancelAnimationFrame(canvasAnimationId); endMeditationAndGoToScene3(); }
+            }, 1000); 
+        }
+
+        document.getElementById('scene-2').addEventListener('click', (event) => {
+            if (event.target.closest('.resonance-ball') || event.target.closest('.med-control-panel') || event.target.closest('.med-confirm-card')) return;
+            if (currentMode === 'B' && isMeditationStarted && !isClockPaused) {
+                document.getElementById('control-panel').style.opacity = '1'; document.querySelector('.global-back-btn').style.opacity = '1'; document.querySelector('.timer-control-center').style.opacity = '1';
+            }
+        });
+
+        function endMeditationAndGoToScene3() { const audio = document.getElementById('bg-audio'); let vol = audio.volume; const fadeOut = setInterval(() => { vol -= 0.05; if(vol <= 0) { vol = 0; audio.pause(); clearInterval(fadeOut); } audio.volume = vol; }, 100); const randomText = UNIVERSE_MESSAGES[Math.floor(Math.random() * UNIVERSE_MESSAGES.length)]; document.getElementById('universe-words').innerText = randomText; document.getElementById('scene-2').classList.remove('active'); document.getElementById('scene-3').classList.add('active'); }
+        function openLetter(element) { element.classList.add('open'); }
+        function fadeAudioIn(audio, duration) { let volume = 0; const interval = 50; const step = interval / duration; const timer = setInterval(() => { volume += step; if(volume >= 1) { volume = 1; clearInterval(timer); } audio.volume = volume; }, interval); }
+    </script>
+</body>
+</html>

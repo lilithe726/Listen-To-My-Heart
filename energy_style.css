@@ -1,0 +1,128 @@
+:root {
+    /* ========================================================
+       🖼️ 【大树素材一键替换中心】
+       ======================================================== */
+    /* 💡 后期你想换成你自己的桃花树图，直接在这改文件名（如 url("素材/tree.png")），下面的 none 记得保留引号 */
+    --pc-custom-tree-image: url("素材/桃花树.jpg"); 
+
+    --sc1-sky-bg: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #fef08a 100%);
+    --c1: #a7f3d0; --c2: #bae6fd; --c3: #fef08a; --c4: #fbcfe8;
+    --c5: #c7d2fe; --c6: #fde2e4; --c7: #e2ece9; --c8: #ffeedb;
+    --c9: #eaf4f4; --ca: #f1e3ff; --cb: #e8fccf; --cc: #d6f5ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+body { background: #f8fafc; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
+
+.global-back-btn { position: fixed; top: 30px; left: 40px; z-index: 999; background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 12px 26px; border-radius: 25px; font-size: 14px; color: #374151; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.3s; }
+.global-back-btn:hover { background: white; transform: translateX(-2px); }
+
+.energy-container { display: none; width: 100vw; height: 100vh; position: relative; overflow: hidden; flex-direction: column; }
+.energy-container.active { display: flex; }
+.energy-container-fullscreen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 40px; background: linear-gradient(135deg, #fff5f5, #e0f2fe); }
+.energy-container-fullscreen.active { display: flex; }
+
+.header-panel { text-align: center; margin-bottom: 35px; z-index: 10; }
+.header-panel h2 { font-size: 32px; color: #431407; font-weight: 800; margin-bottom: 12px; letter-spacing: 1px; }
+.header-panel p { font-size: 15px; color: #7c2d12; opacity: 0.85; }
+
+/* 全屏桃花树宏大舞台 */
+.peach-tree-stage-fullscreen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--sc1-sky-bg); z-index: 1; }
+#tree-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; }
+#petal-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+
+/* 🛠️ 核心机制：自定图片素材的全屏高光定位挂载层 */
+/* ========================================================
+   🛠️ 终极全屏全景修复：让替换后的桃花树素材百分之百拉满全屏
+   ======================================================== */
+#custom-tree-image-layer {
+    display: none;
+    position: absolute;
+    /* 彻底砸碎之前的15%空顶限制，让图片直接从最顶端铺到最底端 */
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: var(--pc-custom-tree-image);
+    /* 🛠️ 核心修正：从 contain 改为 cover，让你的唯美桃花树和猫咪素材完美全屏无缝覆盖 */
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* 让图片死死对齐屏幕中央正底部，草地完美融合 */
+    background-position: center bottom;
+    z-index: 3;
+}
+
+/* 底部操纵卡槽 */
+.bottom-floating-zone-pc { 
+    position: absolute; bottom: 0; left: 0; width: 100%; 
+    padding: 30px 60px 45px 60px; 
+    background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255, 253, 250, 0.7) 40%, rgba(255, 253, 250, 0.95) 100%); 
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+    z-index: 10; display: flex; flex-direction: column; align-items: center;
+}
+.floating-header { text-align: center; margin-bottom: 20px; }
+.floating-header h2 { font-size: 24px; color: #431407; font-weight: bold; margin-bottom: 6px; }
+.floating-header p { font-size: 14px; color: #7c2d12; opacity: 0.85; }
+
+.pc-action-bar-row { display: flex; width: 100%; max-width: 900px; gap: 20px; align-items: center; justify-content: center; }
+
+.wish-card-input-box-pc { 
+    flex: 1; display: flex; align-items: center; background: rgba(255, 255, 255, 0.65); 
+    border: 1px solid rgba(255,255,255,0.8); border-radius: 20px; padding: 4px 18px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.01); 
+}
+.wish-pin { font-size: 20px; margin-right: 10px; }
+.gratitude-input { flex: 1; padding: 12px 0; background: transparent; border: none; font-size: 15px; outline: none; color: #431407; font-weight: 500;}
+.gratitude-input::placeholder { color: #a18276; }
+
+.action-btn-group-pc { display: flex; gap: 15px; }
+
+.glass-energy-btn-pc { 
+    padding: 14px 35px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(255, 255, 255, 0.85); 
+    border-radius: 20px; color: #7c2d12; font-size: 14px; font-weight: bold; cursor: pointer; 
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.3s; white-space: nowrap;
+}
+.glass-energy-btn-pc:not(.disabled):hover { background: white; transform: translateY(-1px); }
+.glass-energy-btn-pc.btn-secondary { color: #9d174d; }
+.glass-energy-btn-pc.disabled { opacity: 0.4; color: #94a3b8; border-color: rgba(255,255,255,0.3); cursor: not-allowed; pointer-events: none; }
+
+.glass-energy-btn-long-fixed {
+    width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(255, 255, 255, 0.85); 
+    border-radius: 25px; color: #431407; font-size: 14px; font-weight: bold; cursor: pointer; 
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); transition: all 0.3s; text-align: center; 
+}
+.glass-energy-btn-long-fixed:hover { background: #ffffff; }
+
+/* 挂签与弹窗 */
+.tree-wish-tag { position: absolute; z-index: 20; display: flex; flex-direction: column; align-items: center; transform: scale(0); opacity: 0; transform-origin: top center; cursor: pointer; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s; }
+.tag-string { font-size: 13px; margin-bottom: -2px; z-index: 22; }
+.tag-body { background: linear-gradient(180deg, #fff1f2 0%, #f43f5e 100%); border: 1px solid rgba(255,255,255,0.6); width: 16px; height: 44px; border-radius: 3px; box-shadow: 0 4px 8px rgba(0,0,0,0.06); display: flex; justify-content: center; align-items: center; }
+.tag-body span { color: white; font-size: 9px; transform: scale(0.85); }
+.tag-hanged-active { opacity: 1; transform: scale(1); animation: wishTagWindSway 3.2s infinite ease-in-out alternate; }
+@keyframes wishTagWindSway { 0% { transform: scale(1) rotate(-5deg); } 100% { transform: scale(1) rotate(7deg); } }
+
+.wish-reveal-popup { position: absolute; top: 32%; left: 50%; transform: translate(-50%, -32%) scale(0.8); width: 90%; max-width: 480px; background: rgba(255, 251, 235, 0.95); backdrop-filter: blur(10px); border: 1px solid #fbcfe8; border-radius: 24px; padding: 25px 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.05); z-index: 100; opacity: 0; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.wish-reveal-popup.pop-active { opacity: 1; transform: translate(-50%, -32%) scale(1); pointer-events: auto; }
+.close-popup-badge { position: absolute; top: 12px; right: 16px; font-size: 22px; color: #f43f5e; cursor: pointer; }
+.popup-title { font-size: 14px; color: #e11d48; font-weight: bold; margin-bottom: 8px; }
+.popup-content { font-size: 15px; color: #431407; line-height: 1.6; }
+
+.pink-streamer { position: fixed; width: 10px; height: 10px; background: #f43f5e; border-radius: 50%; opacity: 0; pointer-events: none; z-index: 99; }
+.fly-active { animation: flyToRandomBranch 0.45s ease-in forwards; }
+@keyframes flyToRandomBranch { 0% { opacity: 1; transform: translate(45vw, 90vh) scale(1); } 100% { opacity: 0; transform: translate(50vw, 45vh) scale(0.2); } }
+
+/* 大转盘 */
+.wheel-wrapper { position: relative; width: 100%; max-width: 360px; aspect-ratio: 1; margin: 0 auto; display: flex; justify-content: center; align-items: center; z-index: 10; }
+.wheel-pointer-top { position: absolute; top: -14px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 22px solid #ffffff; z-index: 50; }
+.macaron-wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; border: 6px solid #fff; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.03); background: conic-gradient( var(--c1) 0deg 30deg, var(--c2) 30deg 60deg, var(--c3) 60deg 90deg, var(--c4) 90deg 120deg, var(--c5) 120deg 150deg, var(--c6) 150deg 180deg, var(--c7) 180deg 210deg, var(--c8) 210deg 240deg, var(--c9) 240deg 270deg, var(--ca) 270deg 300deg, var(--cb) 300deg 330deg, var(--cc) 330deg 360deg ); transition: transform 4s cubic-bezier(0.1, 0.8, 0.25, 1); }
+.sector-text { position: absolute; width: 100%; height: 100%; top: 0; left: 0; transform-origin: center center; }
+.sector-text span { position: absolute; top: 35px; left: 50%; transform: translateX(-50%); width: 22px; font-size: 12px; font-weight: bold; color: #4b5563; line-height: 1.35; text-align: center; display: block; }
+.wheel-center-btn { position: absolute; width: 84px; height: 84px; background: white; border-radius: 50%; z-index: 40; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: #374151; cursor: pointer; box-shadow: 0 6px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
+.wheel-center-btn:hover { transform: scale(1.04); }
+
+.pop-card-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.12); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 100; }
+.pop-card-overlay.show { opacity: 1; pointer-events: auto; }
+.result-card { width: 90%; max-width: 380px; background: white; border-radius: 30px; padding: 35px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.05); transform: translateY(15px); transition: transform 0.5s; border: 1px solid rgba(0,0,0,0.01); }
+.pop-card-overlay.show .result-card { transform: translateY(0); }
+.result-card h3 { font-size: 13px; color: #b45309; margin-bottom: 10px; letter-spacing: 2px;}
+.result-card h1 { font-size: 26px; color: #431407; margin-bottom: 15px; font-weight: bold;}
+.result-card p { font-size: 14px; color: #7c2d12; line-height: 1.6;}

@@ -1,0 +1,170 @@
+:root {
+    --rings-线条大小-thickness: 1px;       
+    --rings-空气感-space-gap: 80px;        
+    --particles-total-count: 120;          
+
+    /* 🌊 1. 【潮汐之岛】 */
+    --wave-audio-src: "素材/海浪.mp3";          
+    --wave-bg-custom-image: url("素材/潮汐.jpg"); 
+    --wave-bg-gradient: none; 
+    --wave-wave-speed-step: 0.28;          
+    --wave-particles-color-base: rgba(14, 165, 233, Opacity); 
+    --wave-ring-layer-1: rgba(3, 105, 161, Opacity); 
+    --wave-ring-layer-2: rgba(2, 132, 199, Opacity); 
+    --wave-ring-layer-3: rgba(14, 165, 233, Opacity);
+    --wave-ring-layer-4: rgba(56, 189, 248, Opacity);
+    --wave-ring-layer-5: rgba(125, 211, 252, Opacity);
+    --wave-ring-layer-6: rgba(186, 230, 253, Opacity);
+    --wave-ring-layer-7: rgba(224, 242, 254, Opacity);
+
+    /* 🔥 2. 【篝火之岛】 */
+    --fire-audio-src: "素材/篝火.mp3";          
+    --fire-bg-custom-image: url("素材/篝火.jpg"); 
+    --fire-bg-gradient: none; 
+    --fire-wave-speed-step: 0.28;          
+    --fire-particles-color-base: rgba(249, 115, 22, Opacity);
+    --fire-ring-layer-1: rgba(194, 65, 12, Opacity);
+    --fire-ring-layer-2: rgba(217, 119, 6, Opacity);
+    --fire-ring-layer-3: rgba(245, 158, 11, Opacity);
+    --fire-ring-layer-4: rgba(251, 146, 60, Opacity);
+    --fire-ring-layer-5: rgba(253, 186, 116, Opacity);
+    --fire-ring-layer-6: rgba(254, 215, 170, Opacity);
+    --fire-ring-layer-7: rgba(255, 247, 237, Opacity);
+
+    /* 🍃 3. 【避雨之岛】 */
+    --rain-audio-src: "素材/听雨.mp3";          
+    --rain-bg-custom-image: url("素材/听雨.jpg"); 
+    --rain-bg-gradient: none; 
+    --rain-wave-speed-step: 0.25;          
+    --rain-particles-color-base: rgba(34, 197, 94, Opacity);
+    --rain-ring-layer-1: rgba(21, 128, 61, Opacity);
+    --rain-ring-layer-2: rgba(22, 163, 74, Opacity);
+    --rain-ring-layer-3: rgba(34, 197, 94, Opacity);
+    --rain-ring-layer-4: rgba(74, 222, 128, Opacity);
+    --rain-ring-layer-5: rgba(134, 239, 172, Opacity);
+    --rain-ring-layer-6: rgba(187, 247, 208, Opacity);
+    --rain-ring-layer-7: rgba(220, 252, 231, Opacity);
+
+    /* 🪐 4. 【颂钵之岛】 */
+    --bowl-audio-src: "素材/钵体.mp3";          
+    --bowl-bg-custom-image: url("素材/钵体.jpg"); 
+    --bowl-bg-gradient: none; 
+    --bowl-wave-speed-step: 0.22;          
+    --bowl-particles-color-base: rgba(168, 85, 247, Opacity);
+    --bowl-ring-layer-1: rgba(126, 34, 206, Opacity);
+    --bowl-ring-layer-2: rgba(147, 51, 234, Opacity);
+    --bowl-ring-layer-3: rgba(168, 85, 247, Opacity);
+    --bowl-ring-layer-4: rgba(192, 132, 252, Opacity);
+    --bowl-ring-layer-5: rgba(216, 180, 254, Opacity);
+    --bowl-ring-layer-6: rgba(233, 213, 255, Opacity);
+    --bowl-ring-layer-7: rgba(243, 232, 255, Opacity);
+
+    --med-sc3-gradient: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 50%, #ffedd5 100%);
+}
+
+body.theme-island-wave #scene-2 { background: var(--wave-bg-gradient); background-image: var(--wave-bg-custom-image); background-size: cover; background-position: center; }
+body.theme-island-fire #scene-2 { background: var(--fire-bg-gradient); background-image: var(--fire-bg-custom-image); background-size: cover; background-position: center; }
+body.theme-island-rain #scene-2 { background: var(--rain-bg-gradient); background-image: var(--rain-bg-custom-image); background-size: cover; background-position: center; }
+body.theme-island-bowl #scene-2 { background: var(--bowl-bg-gradient); background-image: var(--bowl-bg-custom-image); background-size: cover; background-position: center; }
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+body { background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
+
+.global-back-btn { position: fixed; top: 25px; left: 25px; z-index: 999; background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.5); padding: 10px 22px; border-radius: 20px; font-size: 13px; color: #1e293b; font-weight: bold; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.01); transition: all 0.3s; }
+.global-back-btn:hover { background: white; }
+
+/* 🛠️ 核心修复2：将阶段一（选择小岛）彻底拉开重组为电脑全网页PC端超大舒展视窗 */
+.med-container { 
+    display: none; width: 100vw; height: 100vh; 
+    background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%); 
+    padding: 60px 40px; flex-direction: column; align-items: center; justify-content: center;
+}
+.med-container.active { display: flex; animation: medFade 0.4s; }
+
+.med-container-fullscreen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; position: relative; }
+.med-container-fullscreen.active { display: flex; }
+
+#meditation-canvas { position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+#scene-3 { background: var(--med-sc3-gradient) !important; flex-direction: column; align-items: center; justify-content: center;}
+
+.med-header { text-align: center; margin-bottom: 45px; }
+.med-header h2 { font-size: 30px; color: #0f172a; font-weight: bold; margin-bottom: 12px; }
+.med-header p { font-size: 15px; color: #475569; }
+
+/* 🛠️ 核心修复2：小岛网格卡片在电脑全屏下横向 4 列一字优雅铺开，极大提升空间感 */
+.island-grid { 
+    display: grid; grid-template-columns: repeat(4, 1fr); 
+    gap: 24px; width: 100%; max-width: 1000px; margin-bottom: 50px; 
+}
+.island-bubble { background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255,255,255,0.8); border-radius: 28px; padding: 45px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.island-bubble:hover { transform: translateY(-4px); background: #ffffff; box-shadow: 0 15px 35px rgba(14,165,233,0.06); }
+.island-emoji { font-size: 42px; margin-bottom: 16px; }
+.island-name { font-size: 15px; color: #334155; font-weight: bold; }
+.island-bubble.selected { background: #ffffff; border: 2px solid #0284c7; box-shadow: 0 15px 35px rgba(14, 165, 233, 0.1); transform: translateY(-4px); }
+
+/* 登岛大按钮居中卡线 */
+.med-btn { 
+    width: 100%; max-width: 320px; padding: 15px; 
+    background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 50%, #7dd3fc 100%); 
+    border: 1px solid rgba(255,255,255,0.8); border-radius: 25px; 
+    color: #0369a1; font-size: 15px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.15); transition: all 0.3s; 
+}
+.med-btn.disabled { background: rgba(14, 165, 233, 0.08); color: #bae6fd; border-color: rgba(255,255,255,0.2); box-shadow: none; cursor: not-allowed; }
+
+/* 时间显示舱 */
+.timer-control-center { position: fixed; top: 25px; right: 25px; z-index: 1000; }
+.timer-pill-btn-readonly { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.6); padding: 10px 22px; border-radius: 20px; font-size: 15px; font-weight: bold; color: #0c4a6e; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); }
+
+/* 全屏磨砂确认框 */
+.med-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+.med-modal-overlay.active-flex { display: flex; animation: medModalFade 0.4s ease-out; }
+
+.med-confirm-card { background: rgba(255, 255, 255, 0.88); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 30px; width: 90%; max-width: 460px; padding: 45px 35px; text-align: center; box-shadow: 0 25px 60px rgba(15, 23, 42, 0.06); display: flex; flex-direction: column; align-items: center;}
+.confirm-decoration-leaf { font-size: 40px; color: #059669; margin-bottom: 15px; }
+.med-confirm-card h3 { font-size: 22px; color: #0f172a; font-weight: bold; margin-bottom: 20px; }
+.confirm-desc-text { font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 30px; }
+
+/* 🛠️ 核心修复1：确认卡片内部精美的马卡龙时间选择矩阵排架样式 */
+.confirm-time-selector-row { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; background: rgba(255,255,255,0.4); padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.5); }
+.selector-label { font-size: 13px; font-weight: bold; color: #0284c7; margin-bottom: 12px; }
+.confirm-time-options-grid { display: flex; gap: 8px; justify-content: center; width: 100%; }
+.confirm-time-opt { padding: 8px 12px; font-size: 13px; font-weight: bold; color: #475569; background: rgba(255,255,255,0.7); border-radius: 12px; cursor: pointer; border: 1px solid rgba(0,0,0,0.02); transition: all 0.2s; }
+.confirm-time-opt:hover { background: #ffffff; color: #0284c7; }
+/* 高亮激活态：清新半透明马卡龙蓝 */
+.confirm-time-opt.active { background: linear-gradient(135deg, #bae6fd 0%, #e0f2fe 100%); color: #0369a1; border-color: #7dd3fc; box-shadow: 0 4px 10px rgba(14,165,233,0.08); }
+
+.confirm-btn-row { display: flex; gap: 16px; width: 100%; margin-top: 25px; }
+.confirm-sub-btn { flex: 1; padding: 14px; border: none; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; }
+.cancel-btn { background: #f1f5f9; color: #475569; }
+.secure-exit-btn { background: linear-gradient(135deg, #fca5a5, #ef4444); color: white; }
+
+/* 触控球 */
+.meditation-core-zone { position: relative; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; margin: auto 0; z-index: 20;}
+.resonance-ball { position: absolute; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.2) 60%, rgba(255,255,255,0.4) 100%); border: 1px solid rgba(255,255,255,0.7); cursor: pointer; display: flex; justify-content: center; align-items: center; color: #0284c7; font-size: 15px; font-weight: bold; letter-spacing: 1px; box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 10px 30px rgba(14,165,233,0.02); transition: transform 0.2s, background 0.3s; }
+.resonance-ball.pressed { transform: scale(1.08); background: rgba(255,255,255,0.6); color: #0369a1;}
+.mode-b-breathing { animation: ballGlowPure 5s infinite alternate ease-in-out; }
+@keyframes ballGlowPure { 0% { transform: scale(1); } 100% { transform: scale(1.08); } }
+
+.med-control-panel { width: 100%; max-width: 360px; text-align: center; z-index: 20; transition: opacity 0.5s; }
+.med-tip-text { font-size: 13px; color: #0284c7; margin-bottom: 15px; font-weight: 500; }
+.med-mode-toggle { display: flex; background: rgba(255, 255, 255, 0.4); border-radius: 20px; padding: 5px; gap: 4px; border: 1px solid rgba(255,255,255,0.5); }
+.mode-btn { flex: 1; padding: 11px 0; border: none; background: transparent; color: #475569; font-size: 13px; font-weight: bold; border-radius: 16px; cursor: pointer; }
+.mode-btn.active { background: white; color: #0f172a; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+/* 信封 */
+.letter-overlay { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+.letter-box { position: relative; width: 100%; max-width: 340px; height: 120px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); border-radius: 20px; cursor: pointer; display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.02); border: 1px solid rgba(255,255,255,0.6); transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); z-index: 20;}
+.envelope-top { position: absolute; top: 0; width: 0; height: 0; border-left: 170px solid transparent; border-right: 170px solid transparent; border-top: 50px solid rgba(0,0,0,0.02); z-index: 5; transition: transform 0.6s; transform-origin: top; }
+.letter-preview { font-size: 15px; color: #0284c7; font-weight: bold; transition: opacity 0.3s; z-index: 2;}
+.letter-box.open { height: 380px; background: #fff; cursor: default; padding: 30px 20px; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 20px 45px rgba(0,0,0,0.04); }
+.letter-box.open .envelope-top { transform: rotateX(180deg); opacity: 0; }
+.letter-box.open .letter-preview { opacity: 0; display: none; }
+.letter-content { opacity: 0; display: none; flex-direction: column; width: 100%; height: 100%; text-align: left; }
+.letter-box.open .letter-content { display: flex; animation: fadeInDelayed 0.5s 0.2s forwards; }
+.letter-content h3 { font-size: 16px; color: #0284c7; margin-bottom: 15px; font-weight: bold;}
+.letter-content p { font-size: 15px; color: #0c4a6e; line-height: 1.7; font-weight: 500; text-align: justify; }
+
+@keyframes medModalFade { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes medFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInDelayed { 100% { opacity: 1; } }

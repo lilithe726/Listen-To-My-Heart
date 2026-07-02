@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>情绪急救包 电脑全屏网页版</title>
+    <style>
+        /* ========================================================
+           🎨 电脑全屏版重构样式表
+           ======================================================== */
+        :root {
+            --aid-bg-gradient: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 50%, #fff7ed 100%);
+            --aid-text-dark: #4c0519;
+            --aid-text-accent: #be123c;
+            --btn-bg: #ffffff;
+            --btn-text: #e11d48;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+        
+        /* 🛠️ 升级点：身体直接拉满全网页全屏，彻底解脱手机容器束缚 */
+        body { 
+            background: var(--aid-bg-gradient); 
+            width: 100vw;
+            min-height: 100vh;
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
+            overflow-x: hidden; 
+        }
+
+        /* 顶部全局返回按钮 */
+        .global-back-btn { 
+            position: fixed; top: 30px; left: 40px; z-index: 999; 
+            background: rgba(255, 255, 255, 0.55); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+            border: 1px solid rgba(255,255,255,0.6); 
+            padding: 12px 26px; border-radius: 25px; 
+            font-size: 14px; color: #374151; font-weight: bold; 
+            cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.01); 
+            transition: all 0.3s; 
+        }
+        .global-back-btn:hover { background: #fff; transform: translateX(-3px); }
+
+        /* 🛠️ 升级点：容器扩容为全屏流布局模型 */
+        .container-phone { 
+            display: none; 
+            width: 100vw; 
+            min-height: 100vh; 
+            position: relative; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+        .container-phone.active { display: flex; }
+
+        /* 🛠️ 升级点：全屏无死角覆盖图层 */
+        .scene-fullscreen { 
+            display: none; 
+            width: 100vw; 
+            height: 100vh; 
+            position: fixed; top: 0; left: 0; 
+            background: var(--aid-bg-gradient); 
+            z-index: 100; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .scene-fullscreen.active { display: flex; }
+
+        /* ----------------------------------------------------
+           阶段一：SOS急救包长按解封组件
+           ---------------------------------------------------- */
+        .qa-box { width: 100%; max-width: 600px; text-align: center; }
+        .question-text-dark { font-size: 28px; color: var(--aid-text-dark); font-weight: 700; margin-bottom: 45px; letter-spacing: 0.5px; }
+        
+        .btn-group-light { display: flex; gap: 40px; justify-content: center; width: 100%; }
+        .qa-btn-light {
+            background: var(--btn-bg); border: 1px solid rgba(255, 255, 255, 0.8); padding: 14px 45px; border-radius: 25px; 
+            font-size: 16px; font-weight: bold; color: var(--btn-text); cursor: pointer; box-shadow: 0 8px 25px rgba(225, 29, 72, 0.05); transition: all 0.3s;
+        }
+        .qa-btn-light:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(225, 29, 72, 0.12); }
+
+        .zipper-bag-container { width: 180px; height: 180px; margin: 0 auto 35px auto; position: relative; }
+        .zipper-bag { width: 100%; height: 100%; font-size: 110px; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; transition: all 0.2s; }
+        .zipper-bag:active { transform: scale(0.95); }
+        
+        .bag-half { position: absolute; width: 50%; height: 100%; overflow: hidden; display: flex; align-items: center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s; }
+        .left-half { left: 0; justify-content: flex-front; padding-left: 35px; }
+        .right-half { right: 0; justify-content: flex-end; padding-right: 35px; }
+        /* 💡 完美的包包开裂动画机制对齐 */
+        .zipper-open .left-half { transform: translateX(-80px) rotate(-15deg); opacity: 0; }
+        .zipper-open .right-half { transform: translateX(80px) rotate(15deg); opacity: 0; }
+
+        .linear-progress-wrapper { width: 100%; max-width: 380px; display: flex; align-items: center; gap: 15px; margin: 0 auto 30px auto; }
+        .progress-track { flex: 1; height: 14px; background: rgba(225, 29, 72, 0.08); border-radius: 10px; overflow: hidden; }
+        .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #fda4af, #e11d48); border-radius: 10px; transition: width 0.1s linear; }
+        .progress-badge { background: #e11d48; color: white; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; min-width: 42px; text-align: center; }
+        .hint-text-dark { font-size: 15px; color: var(--aid-text-accent); font-weight: 500; text-align: center; }
+
+        /* ----------------------------------------------------
+           阶段二：粉碎机大画布
+           ---------------------------------------------------- */
+        .scene-hint-dark { font-size: 22px; color: var(--aid-text-dark); font-weight: bold; margin-bottom: 50px; text-align: center; z-index: 10; }
+        .bubble-container { width: 100%; max-width: 1200px; height: 50vh; position: relative; margin-bottom: 30px; z-index: 5; }
+        
+        /* 🛠️ 升级点：PC端拖拽大圆泡泡 */
+        .emotion-bubble {
+            position: absolute; width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 16px; font-weight: bold; cursor: move; box-shadow: 0 8px 25px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255,255,255,0.3); transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        /* 粉碎机机组大视窗 */
+        .shredder-zone {
+            width: 100%; max-width: 480px; height: 130px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
+            border: 1.5px dashed var(--btn-text); border-radius: 28px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 10;
+        }
+        .shredder-vortex { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(225,29,72,0.05) 0%, transparent 70%); animation: vortexSpin 6s infinite linear; }
+        .shredder-text { font-size: 18px; color: var(--aid-text-dark); font-weight: bold; z-index: 2; letter-spacing: 1px; }
+        @keyframes vortexSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* ----------------------------------------------------
+           阶段三-一：戳泡泡纸大网格
+           ---------------------------------------------------- */
+        #heart-star-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .pop-header-panel { text-align: center; margin-bottom: 40px; z-index: 20; transition: opacity 0.5s; }
+        .pop-header-panel h2 { font-size: 30px; color: var(--aid-text-dark); font-weight: bold; margin-bottom: 12px; }
+        .pop-header-panel p { font-size: 16px; color: var(--aid-text-accent); font-weight: 500; }
+        
+        /* 🛠️ 升级点：气泡纸九宫格排布，完美收纳在PC屏幕中点 */
+        .fullscreen-bubble-paper {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px;
+            width: 100%; max-width: 460px; z-index: 20; transition: opacity 0.5s;
+        }
+        .fresh-bubble-node {
+            aspect-ratio: 1; background: rgba(255, 255, 255, 0.7); border: 2px solid rgba(225,29,72,0.15); border-radius: 50%;
+            cursor: pointer; box-shadow: inset 0 4px 10px rgba(255,255,255,0.8), 0 6px 15px rgba(0,0,0,0.02); transition: all 0.2s;
+        }
+        .fresh-bubble-node:hover { transform: scale(1.04); background: #ffffff; }
+        .fresh-bubble-node.is-broken { background: rgba(225, 29, 72, 0.04) !important; border: 1.5px dashed rgba(225,29,72,0.3) !important; transform: scale(0.96); box-shadow: none; }
+        
+        /* 原地升起的解压文字 */
+        .floating-cheer-text { position: fixed; z-index: 999; font-size: 15px; font-weight: bold; color: #be123c; animation: floatUp 1s ease-out forwards; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
+
+        /* ----------------------------------------------------
+           阶段三-三：树洞系统
+           ---------------------------------------------------- */
+        #star-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+        .treehole-content { width: 100%; max-width: 650px; text-align: center; z-index: 10; transition: opacity 0.6s; }
+        .tree-input {
+            width: 100%; height: 180px; padding: 25px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.8); border-radius: 24px; font-size: 16px; outline: none; color: var(--aid-text-dark);
+            resize: none; box-shadow: 0 10px 30px rgba(0,0,0,0.02); margin-top: 35px; margin-bottom: 35px; font-family: inherit;
+        }
+        .release-btn {
+            background: #ffffff; border: 1px solid rgba(225,29,72,0.2); padding: 14px 50px; border-radius: 25px;
+            font-size: 15px; color: var(--btn-text); font-weight: bold; cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.02); transition: all 0.3s;
+        }
+        .release-btn:hover { transform: translateY(-2px); border-color: var(--btn-text); }
+
+        /* 完成页 */
+        .final-comfort-box { position: absolute; top:0; left:0; width:100%; height:100%; display:none; align-items:center; justify-content:center; z-index:20; background: var(--aid-bg-gradient); }
+        .final-comfort-box.show { display: flex; animation: fadeIn 0.6s forwards; }
+        .center-comfort-content { text-align: center; }
+        .comfort-text-pro { font-size: 26px; color: var(--aid-text-dark); font-weight: bold; margin-bottom: 45px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="global-back-btn" onclick="window.location.href='index.html'">〈 返回主页</div>
+
+    <!-- ================= 阶段一 ================= -->
+    <div class="container-phone active" id="scene-1">
+        <div class="qa-box" id="qa-1">
+            <p class="question-text-dark">现在感觉有点糟糕，对吗？</p>
+            <div class="btn-group-light">
+                <button class="qa-btn-light" onclick="nextQA()">✓ 是</button>
+                <button class="qa-btn-light" onclick="alert('那太棒啦！'); window.location.href='index.html'">✕ 否</button>
+            </div>
+        </div>
+        
+        <div class="qa-box" id="qa-2" style="display: none;">
+            <p class="question-text-dark">别怕，有我呢。</p>
+            
+            <div class="zipper-bag-container">
+                <div class="zipper-bag" id="main-bag">
+                    <div class="bag-half left-half">💼</div>
+                    <div class="bag-half right-half">💼</div>
+                </div>
+            </div>
+
+            <div class="linear-progress-wrapper">
+                <div class="progress-track"><div class="progress-fill" id="bar-fill"></div></div>
+                <div class="progress-badge" id="bar-num">0%</div>
+            </div>
+            <p class="hint-text-dark">请【长按】上方急急救包打开它</p>
+        </div>
+    </div>
+
+    <!-- ================= 阶段二 ================= -->
+    <div class="container-phone" id="scene-2">
+        <p class="scene-hint-dark">把打扰你的情绪气泡，拖进下方粉碎机中</p>
+        <div class="bubble-container" id="bubble-box"></div>
+        
+        <div class="shredder-zone" id="shredder">
+            <div class="shredder-vortex"></div>
+            <span class="shredder-text">🌪️ 情绪粉碎机</span>
+        </div>
+    </div>
+
+    <!-- ================= 阶段三-一 ================= -->
+    <div class="scene-fullscreen" id="scene-3-1">
+        <canvas id="heart-star-canvas"></canvas>
+        <div class="pop-header-panel" id="pop-text-layer">
+            <h2>捏爆疯狂“压力气泡纸”</h2>
+            <p>疯狂连续点击，戳破整张透明塑料膜！还剩 <span id="pop-count">9</span> 个</p>
+        </div>
+        <div class="fullscreen-bubble-paper" id="pop-grid"></div>
+    </div>
+
+    <!-- ================= 阶段三-三 ================= -->
+    <div class="container-phone" id="scene-3-3">
+        <canvas id="star-canvas"></canvas>
+        <div class="treehole-content" id="treehole-ui">
+            <p class="question-text-dark">现在感觉好些了吗？<br>把刚才让你难过的事写在这里吧。</p>
+            <textarea class="tree-input" id="tree-text" placeholder="吐露你的心声..." oninput="spawnStarEffect(event)"></textarea>
+            <button class="release-btn" onclick="releaseToGalaxy()">释放到银河</button>
+        </div>
+        
+        <div class="final-comfort-box" id="final-box">
+            <div class="center-comfort-content">
+                <p class="comfort-text-pro">你已经做得很好了，抱抱你。❤️</p>
+                <button class="release-btn" onclick="window.location.href='index.html'">完成急救</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BUBBLE_CONFIG = [
+            { text: "愤怒", color: "#ff7675" },
+            { text: "焦虑", color: "#fdcb6e" },
+            { text: "委屈", color: "#55efc4" },
+            { text: "想哭", color: "#74b9ff" },
+            { text: "空虚", color: "#a29bfe" },
+            { text: "内耗", color: "#fab1a0" },
+            { text: "迷茫", color: "#fd79a8" }
+        ];
+
+        const POP_CHEERS = ["做得真棒!", "呼气放松~", "压力碎掉啦!", "超级优秀!", "抱抱自己!", "清空负能量!", "你在变好!", "稳稳落地!", "彻底解压!"];
+
+        function changeScene(curr, next) {
+            document.getElementById(curr).classList.remove('active');
+            document.getElementById(next).classList.add('active');
+            if(next === 'scene-2') initEmotionBubbles(); 
+            if(next === 'scene-3-1') initFreshBubblePaper(); 
+            if(next === 'scene-3-3') initCanvas(); 
+        }
+
+        function nextQA() {
+            document.getElementById('qa-1').style.display = 'none';
+            document.getElementById('qa-2').style.display = 'block';
+            initLinearProgressBag();
+        }
+
+        // --- 1秒高精度长按核心逻辑 ---
+        function initLinearProgressBag() {
+            const bag = document.getElementById('main-bag');
+            const fill = document.getElementById('bar-fill');
+            const numBadge = document.getElementById('bar-num');
+            let startTime = 0, timerAnimate = null; 
+            const targetDuration = 1000; 
+
+            const startPress = (e) => {
+                e.preventDefault(); 
+                startTime = Date.now(); 
+                
+                const update = () => {
+                    const elapsed = Date.now() - startTime; 
+                    let percent = (elapsed / targetDuration) * 100;
+                    
+                    if(percent >= 100) {
+                        fill.style.width = '100%'; 
+                        numBadge.innerText = '100%'; 
+                        cancelAnimationFrame(timerAnimate); 
+                        if (navigator.vibrate) navigator.vibrate(100); 
+                        bag.classList.add('zipper-open');
+                        setTimeout(() => { changeScene('scene-1', 'scene-2'); }, 600);
+                    } else {
+                        fill.style.width = percent + '%'; 
+                        numBadge.innerText = Math.floor(percent) + '%';
+                        timerAnimate = requestAnimationFrame(update);
+                    }
+                };
+                timerAnimate = requestAnimationFrame(update);
+            };
+            
+            const endPress = () => { 
+                cancelAnimationFrame(timerAnimate); 
+                fill.style.width = '0%'; 
+                numBadge.innerText = '0%'; 
+            };
+            
+            bag.addEventListener('mousedown', startPress); bag.addEventListener('mouseup', endPress); bag.addEventListener('mouseleave', endPress);
+            bag.addEventListener('touchstart', startPress); bag.addEventListener('touchend', endPress);
+        }
+
+        // --- 阶段二拖拽算法（已完成PC响应式坐标自适应） ---
+        let dragTarget = null; let startX = 0, startY = 0; let originalLeft = 0, originalTop = 0; let destroyedCount = 0;
+
+        function initEmotionBubbles() {
+            const container = document.getElementById('bubble-box');
+            container.innerHTML = ''; 
+            destroyedCount = 0;
+            
+            // 🛠️ 升级点：PC端大幅扩宽的等比自适应错落坐标坑位
+            const coordinates = [
+                { top: "10%", left: "12%" }, { top: "18%", left: "45%" },
+                { top: "12%", left: "75%" }, { top: "45%", left: "20%" },
+                { top: "42%", left: "55%" }, { top: "48%", left: "80%" },
+                { top: "28%", left: "33%" }
+            ];
+
+            BUBBLE_CONFIG.forEach((conf, i) => {
+                const b = document.createElement('div');
+                b.className = 'emotion-bubble';
+                b.innerText = conf.text;
+                b.style.backgroundColor = conf.color; 
+                
+                // 🛠️ 升级点：支持百分比或像素的流式平铺渲染
+                if(coordinates[i].left.includes('%')) {
+                    b.style.top = coordinates[i].top;
+                    b.style.left = coordinates[i].left;
+                } else {
+                    b.style.top = coordinates[i].top;
+                    b.style.left = coordinates[i].left;
+                }
+                
+                b.addEventListener('mousedown', dragStart);
+                b.addEventListener('touchstart', dragStart);
+                container.appendChild(b);
+            });
+        }
+
+        function dragStart(e) {
+            e.preventDefault(); dragTarget = e.currentTarget;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = clientX; startY = clientY; originalLeft = dragTarget.offsetLeft; originalTop = dragTarget.offsetTop;
+            
+            // 强行锁死绝对物理位置定位，防止大屏流自适应坍塌
+            dragTarget.style.position = 'absolute';
+            dragTarget.style.left = originalLeft + 'px';
+            dragTarget.style.top = originalTop + 'px';
+
+            document.addEventListener('mousemove', dragMove); document.addEventListener('touchmove', dragMove, { passive: false });
+            document.addEventListener('mouseup', dragEnd); document.addEventListener('touchend', dragEnd);
+        }
+        function dragMove(e) { if (!dragTarget) return; const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; dragTarget.style.left = (originalLeft + (clientX - startX)) + 'px'; dragTarget.style.top = (originalTop + (clientY - startY)) + 'px'; }
+        function dragEnd() {
+            if (!dragTarget) return; const shredder = document.getElementById('shredder').getBoundingClientRect(); const bubble = dragTarget.getBoundingClientRect();
+            const isColliding = !(bubble.right < shredder.left || bubble.left > shredder.right || (bubble.bottom - 10) < shredder.top || bubble.top > shredder.bottom);
+            if (isColliding) {
+                dragTarget.style.transform = 'scale(0) rotate(180deg)'; dragTarget.style.opacity = '0'; if (navigator.vibrate) navigator.vibrate(40);
+                const t = dragTarget; setTimeout(() => t.remove(), 300); destroyedCount++;
+                if(destroyedCount === BUBBLE_CONFIG.length) setTimeout(() => { changeScene('scene-2', 'scene-3-1'); }, 600);
+            } else {
+                dragTarget.style.transition = 'all 0.3s ease'; dragTarget.style.left = originalLeft + 'px'; dragTarget.style.top = originalTop + 'px';
+                const t = dragTarget; setTimeout(() => t.style.transition = 'none', 300);
+            }
+            document.removeEventListener('mousemove', dragMove); document.removeEventListener('touchmove', dragMove); document.removeEventListener('mouseup', dragEnd); document.removeEventListener('touchend', dragEnd); dragTarget = null;
+        }
+
+        // --- 阶段三-一：戳泡泡纸 ---
+        let remainingPops = 9; 
+        function initFreshBubblePaper() {
+            const grid = document.getElementById('pop-grid'); grid.innerHTML = ''; remainingPops = 9;
+            document.getElementById('pop-count').innerText = remainingPops;
+            for(let i=0; i<remainingPops; i++) {
+                const node = document.createElement('div'); node.className = 'fresh-bubble-node';
+                node.onclick = function(e) {
+                    if(!this.classList.contains('is-broken')) {
+                        this.style.clipPath = getRandomClipPath(i);
+                        this.classList.add('is-broken');
+                        if (navigator.vibrate) navigator.vibrate(30); 
+                        spawnCheerText(e, POP_CHEERS[i % POP_CHEERS.length]);
+                        remainingPops--;
+                        document.getElementById('pop-count').innerText = remainingPops;
+                        if(remainingPops === 0) {
+                            document.getElementById('pop-grid').style.opacity = '0';
+                            document.getElementById('pop-text-layer').style.opacity = '0';
+                            setTimeout(() => { startHeartGalaxyEffect(); }, 500);
+                        }
+                    }
+                };
+                grid.appendChild(node);
+            }
+        }
+
+        function spawnCheerText(event, textStr) {
+            const word = document.createElement('div'); word.className = 'floating-cheer-text'; word.innerText = textStr;
+            word.style.left = (event.clientX - 40) + 'px'; word.style.top = (event.clientY - 20) + 'px';
+            document.body.appendChild(word); setTimeout(() => { word.remove(); }, 1000);
+        }
+
+        function getRandomClipPath(index) {
+            const paths = [
+                "polygon(50% 15%, 62% 28%, 82% 18%, 73% 46%, 93% 53%, 72% 67%, 77% 88%, 51% 76%, 27% 92%, 32% 61%, 8% 52%, 27% 38%, 18% 8%)",
+                "polygon(52% 0%, 63% 31%, 98% 26%, 76% 51%, 89% 87%, 50% 68%, 13% 89%, 25% 54%, 0% 32%, 35% 29%)",
+                "polygon(39% 10%, 60% 20%, 86% 12%, 69% 39%, 95% 68%, 61% 69%, 52% 98%, 38% 68%, 11% 64%, 31% 43%, 12% 22%, 33% 25%)"
+            ];
+            return paths[index % paths.length];
+        }
+
+        function startHeartGalaxyEffect() {
+            const canvas = document.getElementById('heart-star-canvas'); const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            let particles = []; const totalStars = 180;
+            for(let i=0; i<totalStars; i++) {
+                let t = Math.PI * 2 * (i / totalStars);
+                let heartX = 16 * Math.pow(Math.sin(t), 3);
+                let heartY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                particles.push({
+                    currentX: Math.random() * canvas.width, currentY: Math.random() * canvas.height,
+                    targetX: canvas.width / 2 + heartX * 12, 
+                    targetY: (canvas.height / 2 - 60) + heartY * 12,
+                    size: Math.random() * 3 + 2, color: `hsla(${Math.random() * 40 + 340}, 100%, 85%, ${Math.random() * 0.4 + 0.6})`
+                });
+            }
+            let animationFrame;
+            function drawGalaxy() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); let arrived = 0;
+                particles.forEach(p => {
+                    let dx = p.targetX - p.currentX; let dy = p.targetY - p.currentY;
+                    p.currentX += dx * 0.06; p.currentY += dy * 0.06;
+                    ctx.beginPath(); ctx.arc(p.currentX, p.currentY, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color; ctx.shadowBlur = 10; ctx.shadowColor = p.color; ctx.fill();
+                    if(Math.abs(dx) < 1 && Math.abs(dy) < 1) arrived++;
+                });
+                if(arrived > totalStars * 0.9) {
+                    cancelAnimationFrame(animationFrame); ctx.font = "bold 24px -apple-system"; ctx.fillStyle = "#4c0519"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
+                    ctx.fillText("宇宙正亮起万千星光，都在偷偷爱着你", canvas.width / 2, canvas.height / 2 + 190);
+                    setTimeout(() => { changeScene('scene-3-1', 'scene-3-3'); }, 3000);
+                } else { animationFrame = requestAnimationFrame(drawGalaxy); }
+            }
+            drawGalaxy();
+        }
+
+        // --- 阶段三-三：树洞系统 ---
+        let canvas, ctx, stars = [];
+        function initCanvas() { canvas = document.getElementById('star-canvas'); ctx = canvas.getContext('2d'); canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight; animateStars(); }
+        function spawnStarEffect(e) { if(e.inputType === 'deleteContentBackward') return; const val = e.target.value; const lastChar = val.charAt(val.length - 1) || "✨"; stars.push({ x: canvas.width / 2 + (Math.random() * 120 - 60), y: canvas.height - 220, text: lastChar, opacity: 1, speedY: Math.random() * 2 + 1, size: Math.random() * 10 + 15 }); }
+        function animateStars() { ctx.clearRect(0, 0, canvas.width, canvas.height); stars.forEach((s, index) => { s.y -= s.speedY; s.opacity -= 0.005; ctx.fillStyle = `rgba(76, 5, 25, ${s.opacity})`; ctx.font = `${s.size}px Arial`; ctx.fillText(s.text, s.x, s.y); if(s.opacity <= 0) stars.splice(index, 1); }); requestAnimationFrame(animateStars); }
+        function releaseToGalaxy() { document.getElementById('treehole-ui').style.opacity = '0'; setTimeout(() => { document.getElementById('final-box').classList.add('show'); }, 600); }
+    </script>
+</body>
+</html>

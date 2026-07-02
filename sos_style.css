@@ -1,0 +1,148 @@
+/* ========================================================
+   🔧 全局工业级【视觉及配色魔改控制面板】
+   （不用去代码深处摸索，在这里改颜色参数，全站一键同步改变！）
+   ======================================================== */
+:root {
+    /* 1. 全局背景马卡龙柔美三色渐变线 */
+    --global-bg: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 40%, #ffedd5 100%);
+    
+    /* 2. 手机外壳毛玻璃皮肤颜色 */
+    --phone-panel-bg: rgba(255, 255, 255, 0.5);
+    
+    /* 3. 蓄力高亮核心主题色（按钮、100%进度条高光） */
+    --theme-primary: #e11d48;
+    --theme-primary-light: #ff718b;
+    
+    /* 4. 情绪粉碎机虚线框与文字颜色 */
+    --shredder-border-color: #e11d48;
+    --shredder-text-color: #e11d48;
+    
+    /* 5. 压力纸半透明白色底托方箱背景 */
+    --paper-bg-box: rgba(255, 255, 255, 0.38);
+    
+    /* 6. 图四、图五文字的基础色深（深樱桃咖） */
+    --text-main-dark: #4c0519;
+}
+
+/* ========================================================
+   核心控制骨架层
+   ======================================================== */
+* {
+    margin: 0; padding: 0; box-sizing: border-box;
+    -webkit-user-select: none; user-select: none;
+}
+
+body {
+    background: var(--global-bg); /* 读取控制面板的全局渐变底色 */
+    display: flex; justify-content: center; align-items: center;
+    min-height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif;
+}
+
+.global-back-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 999;
+    background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px);
+    padding: 10px 20px; border-radius: 20px; font-size: 14px;
+    color: var(--theme-primary); font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.container-phone {
+    display: none; width: 100vw; height: 100vh; max-width: 414px; max-height: 85vh;
+    background: var(--phone-panel-bg); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.5); border-radius: 35px;
+    position: relative; overflow: hidden; padding: 25px; flex-direction: column;
+    box-shadow: 0 20px 50px rgba(225, 29, 72, 0.06);
+}
+.container-phone.active { display: flex; }
+
+.question-text-dark { font-size: 22px; color: var(--text-main-dark); text-align: center; margin-top: 40px; font-weight: bold; line-height: 1.6;}
+.hint-text-dark { color: #881337; text-align: center; margin-top: 25px; font-size: 14px; font-weight: 500;}
+.scene-hint-dark { text-align: center; color: #881337; font-size: 15px; margin-top: 10px; margin-bottom: 20px;}
+
+.btn-group-light { display: flex; justify-content: space-around; margin-top: 40px; }
+.qa-btn-light { padding: 12px 35px; border-radius: 25px; border: none; background: white; color: var(--theme-primary); font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(225,29,72,0.15);}
+
+/* 阶段一：急救箱 */
+.zipper-bag-container { width: 100%; height: 140px; display: flex; justify-content: center; align-items: center; margin-top: 60px;}
+.zipper-bag { position: relative; width: 120px; height: 120px; cursor: pointer;}
+.bag-half { position: absolute; width: 120px; height: 120px; font-size: 110px; line-height: 120px; text-align: center; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s; }
+.left-half { clip-path: inset(0 50% 0 0); left: 0; }
+.right-half { clip-path: inset(0 0 0 50%); left: 0; }
+
+/* 裂开动效：当长按蓄满 100% 后，包包在原地撕开，并在 0.6 秒内慢慢变透明淡出 */
+.zipper-open .left-half { transform: translateX(-50px) rotate(-15deg); opacity: 0; }
+.zipper-open .right-half { transform: translateX(50px) rotate(15deg); opacity: 0; }
+
+.linear-progress-wrapper { width: 85%; margin: 30px auto 0 auto; display: flex; align-items: center; gap: 15px; }
+.progress-track { flex: 1; height: 10px; background: rgba(225, 29, 72, 0.1); border-radius: 5px; overflow: hidden; }
+.progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, var(--theme-primary-light), var(--theme-primary)); border-radius: 5px; transition: width 0.05s linear; }
+.progress-badge { padding: 4px 10px; background: var(--theme-primary); color: white; border-radius: 12px; font-size: 12px; font-weight: bold; min-width: 45px; text-align: center; }
+
+/* 阶段二气泡网格 */
+.bubble-container { position: relative; flex: 1; width: 100%; overflow: visible;}
+.emotion-bubble {
+    position: absolute; width: 70px; height: 70px; border-radius: 50%;
+    color: white; font-size: 14px; font-weight: bold;
+    display: flex; justify-content: center; align-items: center;
+    box-shadow: inset -4px -4px 12px rgba(0,0,0,0.15), inset 4px 4px 12px rgba(255,255,255,0.3), 0 8px 20px rgba(0,0,0,0.06); 
+    cursor: grab; transition: transform 0.2s, opacity 0.3s;
+}
+
+/* 巨型粉碎机 */
+.shredder-zone { width: 100%; height: 140px; position: relative; margin-bottom: 5px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(255, 255, 255, 0.75); border: 2px dashed var(--shredder-border-color); border-radius: 24px; overflow: hidden; }
+.shredder-vortex { position: absolute; width: 240px; height: 240px; background: radial-gradient(circle, rgba(225,29,72,0.15) 0%, transparent 65%); animation: spin-slow 8s infinite linear; }
+.shredder-text { z-index: 5; font-size: 17px; color: var(--shredder-text-color); font-weight: bold; letter-spacing: 1px;}
+@keyframes spin-slow { 100% { transform: rotate(360deg); } }
+
+/* 阶段三九宫格气泡纸 */
+.scene-fullscreen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative;}
+.scene-fullscreen.active { display: flex; }
+#heart-star-canvas { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: 5; }
+
+.pop-header-panel { text-align: center; margin-bottom: 30px; transition: opacity 0.4s; }
+.pop-header-panel h2 { font-size: 26px; color: var(--text-main-dark); font-weight: 900; margin-bottom: 8px; }
+.pop-header-panel p { font-size: 14px; color: #881337; }
+
+/* 完美覆盖方箱：3列九宫格 */
+.fullscreen-bubble-paper { 
+    width: 100%; max-width: 400px; height: 100%; max-height: 400px; 
+    background: var(--paper-bg-box); backdrop-filter: blur(15px); 
+    border: 2px solid rgba(255, 255, 255, 0.6); border-radius: 32px; 
+    padding: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.01); transition: opacity 0.4s; z-index: 10;
+}
+.fresh-bubble-node { aspect-ratio: 1; cursor: pointer; border-radius: 50%; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.1) 50%, rgba(225,235,255,0.2) 100%); box-shadow: 0 6px 12px rgba(0,0,0,0.02), inset -2px -2px 6px rgba(0,0,0,0.04), inset 2px 2px 6px rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.4); }
+.fresh-bubble-node.is-broken {
+    background: rgba(225, 29, 72, 0.12); border: none; transform: scale(0.95); pointer-events: none;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,0.12); animation: breakPop 0.18s ease-out;
+}
+@keyframes breakPop { 0% { transform: scale(1.2); } 100% { transform: scale(0.95); } }
+
+.floating-cheer-text {
+    position: fixed; pointer-events: none; z-index: 200;
+    font-size: 15px; font-weight: bold; color: var(--theme-primary);
+    text-shadow: 0 2px 8px rgba(255,255,255,0.8);
+    animation: floatUpAndFade 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+@keyframes floatUpAndFade {
+    0% { transform: translateY(0) scale(0.8); opacity: 0; }
+    20% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+    100% { transform: translateY(-40px) scale(0.9); opacity: 0; }
+}
+
+/* 阶段四树洞 */
+#star-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.treehole-content { display: flex; flex-direction: column; flex: 1; z-index: 5; width: 100%;}
+.tree-input { width: 100%; height: 160px; background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255,255,255,0.6); border-radius: 15px; color: var(--text-main-dark); padding: 15px; font-size: 16px; margin-top: 40px; resize: none; outline: none; }
+.tree-input::placeholder { color: #c3a4ac; }
+.release-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--theme-primary-light), var(--theme-primary)); border: none; border-radius: 25px; color: white; font-size: 16px; font-weight: bold; margin-top: auto; margin-bottom: 20px; cursor: pointer; box-shadow: 0 5px 15px rgba(225,29,72,0.2); }
+
+/* 图五专属居中框 */
+.final-comfort-box {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--global-bg);
+    display: flex; justify-content: center; align-items: center; padding: 25px;
+    opacity: 0; pointer-events: none; transition: opacity 0.6s ease-in-out; z-index: 99;
+}
+.final-comfort-box.show { opacity: 1; pointer-events: auto; }
+.center-comfort-content { width: 100%; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.comfort-text-pro { font-size: 24px; color: var(--text-main-dark); font-weight: bold; margin-bottom: 60px; line-height: 1.5;}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>给情绪降温</title>
+    <link rel="stylesheet" href="style.css"> <!-- 复用主页的柔黄色皮肤 -->
+    <style>
+        /* ========================================================
+           💻 PC 网页端全屏自适应布局重构区
+           ======================================================== */
+        * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+
+        /* 身体拉满全屏，使其在任意电脑分辨率下都能无缝居中对齐 */
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* 🛠️ 升级点：让中央主容器在 PC 端化身为优雅的反思白宣纸大面板 */
+        .app-container {
+            width: 100%;
+            max-width: 680px; /* 电脑端最舒适的黄金阅读与书写宽度 */
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 28px;
+            padding: 60px 50px;
+            box-shadow: 0 20px 50px rgba(219, 156, 0, 0.03);
+            position: relative;
+        }
+
+        /* 修正悬浮返回按钮在大屏下的定位 */
+        .back-btn {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #3d342e;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover { transform: translateX(-2px); }
+
+        .step-page { display: none; width: 100%; }
+        .step-page.active { display: block; animation: coolFadeIn 0.4s ease-out forwards; }
+        
+        .progress-num { text-align: center; font-size: 24px; color: #db9c00; font-weight: bold; margin-bottom: 25px; }
+        .question-title { font-size: 22px; color: #3d342e; line-height: 1.6; margin-bottom: 30px; font-weight: bold; text-align: center; }
+        
+        /* 🛠️ 升级点：电脑端输入大框，光标书写深度优化 */
+        .input-box { 
+            width: 100%; 
+            height: 160px; 
+            background: rgba(255, 255, 255, 0.8); 
+            border: 1px solid rgba(0,0,0,0.05); 
+            border-radius: 18px; 
+            padding: 20px; 
+            font-size: 16px; 
+            line-height: 1.7;
+            color: #333; 
+            resize: none; 
+            outline: none; 
+            -webkit-user-select: text; user-select: text; /* 确保 PC 端键盘能够正常输入 */
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.01); 
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .input-box:focus { background: #ffffff; border-color: #db9c00; box-shadow: 0 10px 25px rgba(219, 156, 0, 0.05); }
+        
+        .nav-actions { margin-top: 40px; display: flex; justify-content: flex-end; width: 100%; }
+        
+        .btn-circle { 
+            width: 52px; height: 52px; background: #6c757d; border: none; border-radius: 50%; 
+            color: white; font-size: 22px; cursor: pointer; display: flex; justify-content: center; align-items: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.25s;
+        }
+        .btn-circle:hover { transform: scale(1.05); background-color: #495057; }
+
+        @keyframes coolFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- 点击跳回主首页 -->
+        <div class="back-btn" onclick="window.location.href='index.html'">〈</div>
+
+        <!-- 第 1 步 -->
+        <div class="step-page active" id="cool-1">
+            <div class="progress-num">1/5</div>
+            <div class="question-title">是什么事情触发了你的情绪？</div>
+            <textarea class="input-box" placeholder="试着还原客观事件，识别你的情绪导火线..."></textarea>
+            <div class="nav-actions"><button class="btn-circle" onclick="nextCoolStep(1, 2)">➔</button></div>
+        </div>
+
+        <!-- 第 2 步 -->
+        <div class="step-page" id="cool-2">
+            <div class="progress-num">2/5</div>
+            <div class="question-title">「自我察觉」你的情绪是怎么样的？</div>
+            <textarea class="input-box" placeholder="觉察并写下你当下的内心需求，比如：感到憋屈、渴望被理解..."></textarea>
+            <div class="nav-actions"><button class="btn-circle" onclick="nextCoolStep(2, 3)">➔</button></div>
+        </div>
+
+        <!-- 第 3 步 -->
+        <div class="step-page" id="cool-3">
+            <div class="progress-num">3/5</div>
+            <div class="question-title">如果给现在的愤怒/焦虑程度打分？(0-100)</div>
+            <input type="number" class="input-box" style="height: 60px;" placeholder="写下一个直观的数字">
+            <div class="nav-actions"><button class="btn-circle" onclick="nextCoolStep(3, 4)">➔</button></div>
+        </div>
+
+        <!-- 第 4 步 -->
+        <div class="step-page" id="cool-4">
+            <div class="progress-num">4/5</div>
+            <div class="question-title">你对这件事背后的想法或假设是什么？</div>
+            <textarea class="input-box" placeholder="是不是脑海里有一些固有的糟糕解释在影响你？"></textarea>
+            <div class="nav-actions"><button class="btn-circle" onclick="nextCoolStep(4, 5)">➔</button></div>
+        </div>
+
+        <!-- 第 5 步 -->
+        <div class="step-page" id="cool-5">
+            <div class="progress-num">5/5</div>
+            <div class="question-title">这次你可以做点什么，来更好地关怀和缓解自己？</div>
+            <textarea class="input-box" placeholder="写下一件立刻可以去做的舒适小事..."></textarea>
+            <div class="nav-actions"><button class="btn-circle" style="background-color: #2a9d8f;" onclick="finishCool()">✓</button></div>
+        </div>
+    </div>
+
+    <script>
+        function nextCoolStep(curr, next) {
+            document.getElementById(`cool-${curr}`).classList.remove('active');
+            document.getElementById(`cool-${next}`).classList.add('active');
+        }
+        function finishCool() {
+            alert("🌿 降温日记记录成功。把纷乱的想法写在纸上，大脑就已经清空了一半，做得很好！");
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

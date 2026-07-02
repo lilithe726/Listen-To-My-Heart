@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>古风桃花树许愿签 PC全屏网页版</title>
+    <link rel="stylesheet" href="energy_style.css">
+</head>
+<body>
+
+    <!-- 全局返回按钮 -->
+    <div class="global-back-btn" onclick="window.location.href='index.html'">〈 返回主页</div>
+
+    <!-- ================= 阶段一：全景远景桃花树许愿 ================= -->
+    <div class="energy-container active" id="scene-1">
+        
+        <div class="peach-tree-stage-fullscreen" id="stage-wrapper">
+            <!-- 满屏纷纷扬扬落花画布 -->
+            <canvas id="petal-canvas"></canvas>
+            <!-- 100% 全景远景画布 -->
+            <canvas id="tree-canvas"></canvas>
+            
+            <!-- 🛠️ 核心机制：后期如果替换了你自己的大树图片，图片会全自动作为背景亮起在该容器内 -->
+            <div id="custom-tree-image-layer"></div>
+            
+            <!-- 树上许愿签容器 -->
+            <div id="wish-tags-container"></div>
+
+            <!-- 点击树上任意一个许愿签时，弹出的查阅宣纸小牌层 -->
+            <div class="wish-reveal-popup" id="reveal-popup">
+                <div class="close-popup-badge" onclick="closeWishPopup(event)">×</div>
+                <div class="popup-title">📜 摘下的许愿签</div>
+                <p class="popup-content" id="reveal-text">这里是内容</p>
+            </div>
+        </div>
+
+        <!-- 底部操纵卡槽 -->
+        <div class="bottom-floating-zone-pc">
+            <div class="floating-header">
+                <h2>今日桃花许愿树</h2>
+                <p>写下今日一乐点击挂上，小签将悄悄隐在枝头。点击树上的签即可重新摘取温增记忆。</p>
+            </div>
+
+            <!-- 核心长条操作栏 -->
+            <div class="pc-action-bar-row">
+                <div class="wish-card-input-box-pc">
+                    <span class="wish-pin">🔖</span>
+                    <input type="text" class="gratitude-input" id="g-1" placeholder="写下一件让你嘴角上扬的小事..." onkeydown="if(event.key==='Enter') hangWishTag()">
+                </div>
+                <div class="pink-streamer" id="wish-streamer"></div> 
+                
+                <div class="action-btn-group-pc">
+                    <button class="glass-energy-btn-pc" id="submit-wish-btn" onclick="hangWishTag()">挂上树梢</button>
+                    <button class="glass-energy-btn-pc btn-secondary disabled" id="next-btn-1" disabled onclick="changeScene('scene-1', 'scene-3')">下一站：？ 〉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 阶段三：100件小事治愈大转盘 ================= -->
+    <div class="energy-container-fullscreen" id="scene-3">
+        <div class="header-panel text-center">
+            <h2>哄自己开心的 100 件小事</h2>
+            <p>能量充满！最后，让宇宙为你随机抽取一件当下的治愈行动指南吧。</p>
+        </div>
+
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer-top"></div>
+            <div class="macaron-wheel" id="wheel-plate">
+                <div class="sector-text" style="transform: rotate(15deg);"><span>吃冰淇淋</span></div>
+                <div class="sector-text" style="transform: rotate(45deg);"><span>听纯音乐</span></div>
+                <div class="sector-text" style="transform: rotate(75deg);"><span>发呆五分钟</span></div>
+                <div class="sector-text" style="transform: rotate(105deg);"><span>大懒腰</span></div>
+                <div class="sector-text" style="transform: rotate(135deg);"><span>晒太阳</span></div>
+                <div class="sector-text" style="transform: rotate(165deg);"><span>看云朵</span></div>
+                <div class="sector-text" style="transform: rotate(195deg);"><span>给猫招手</span></div>
+                <div class="sector-text" style="transform: rotate(225deg);"><span>喝杯温水</span></div>
+                <div class="sector-text" style="transform: rotate(255deg);"><span>拍张风景</span></div>
+                <div class="sector-text" style="transform: rotate(285deg);"><span>买一束花</span></div>
+                <div class="sector-text" style="transform: rotate(315deg);"><span>闭眼冥想</span></div>
+                <div class="sector-text" style="transform: rotate(345deg);"><span>洗热水澡</span></div>
+            </div>
+            <div class="wheel-center-btn" onclick="spinTheWheel()">开始</div>
+        </div>
+
+        <div class="pop-card-overlay" id="result-popup">
+            <div class="result-card">
+                <h3>✨ 今日治愈指南 ✨</h3>
+                <h1 id="todo-title">去买个冰淇淋</h1>
+                <p>现在就动身去完成这件快乐的小事吧，抱抱优秀的你！爱你老己，下次见！</p>
+                <button class="glass-energy-btn-long-fixed" style="margin-top:25px;" onclick="window.location.href='index.html'">完成注入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         🧠 JavaScript 核心远景自适应与斜向落花风向对齐引擎
+         ======================================================== -->
+    <script>
+        // 外部素材一键替换面板
+        const GLOBAL_ASSETS_HUB = {
+            images: { customTreeSprite: '', customGrassSprite: '' }
+        };
+
+        let petalsArray = []; let wishTagsList = []; let branchNodes = []; let petalCanvas, petalCtx, treeCanvas, treeCtx; let isFullBloom = false; 
+        let usingCustomImage = false; 
+
+        window.onload = function() { 
+            checkAssetMode();
+            buildPeachTreeWithGrass(); 
+            initPetalRainEngine(); 
+        };
+        
+        function changeScene(curr, next) { 
+            document.getElementById(curr).classList.remove('active'); 
+            document.getElementById(next).classList.add('active'); 
+        }
+
+        function checkAssetMode() {
+            const currentComputedStyle = getComputedStyle(document.documentElement);
+            const customTreeImg = currentComputedStyle.getPropertyValue('--pc-custom-tree-image').trim().replace(/['"]/g, '');
+            const imgLayer = document.getElementById('custom-tree-image-layer');
+            
+            if (customTreeImg && customTreeImg !== 'none') {
+                usingCustomImage = true;
+                imgLayer.style.display = 'block';
+            } else {
+                usingCustomImage = false;
+                imgLayer.style.display = 'none';
+            }
+        }
+        
+        function buildPeachTreeWithGrass() { 
+            treeCanvas = document.getElementById('tree-canvas'); treeCtx = treeCanvas.getContext('2d'); 
+            treeCanvas.width = window.innerWidth; treeCanvas.height = window.innerHeight; 
+            treeCtx.clearRect(0, 0, treeCanvas.width, treeCanvas.height); branchNodes = []; 
+            
+            let grassGradient = treeCtx.createLinearGradient(0, treeCanvas.height - 180, 0, treeCanvas.height); 
+            grassGradient.addColorStop(0, 'rgba(187, 247, 208, 0.9)'); grassGradient.addColorStop(1, '#4ade80'); 
+            treeCtx.fillStyle = grassGradient; treeCtx.beginPath(); treeCtx.moveTo(0, treeCanvas.height - 180); 
+            treeCtx.bezierCurveTo(treeCanvas.width * 0.25, treeCanvas.height - 210, treeCanvas.width * 0.75, treeCanvas.height - 150, treeCanvas.width, treeCanvas.height - 180); 
+            treeCtx.lineTo(treeCanvas.width, treeCanvas.height); treeCtx.lineTo(0, treeCanvas.height); treeCtx.closePath(); treeCtx.fill(); 
+            
+            if (usingCustomImage) return; 
+
+            function drawBranch(startX, startY, len, angle, branchWidth) { 
+                treeCtx.beginPath(); treeCtx.save(); treeCtx.strokeStyle = "#4a2c11"; treeCtx.lineWidth = branchWidth; treeCtx.translate(startX, startY); treeCtx.rotate(angle * Math.PI / 180); treeCtx.moveTo(0, 0); treeCtx.lineTo(0, -len); treeCtx.stroke(); 
+                if (len < 32 && len > 8) { let currentMatrix = treeCtx.getTransform(); branchNodes.push({ x: currentMatrix.e, y: currentMatrix.f - len * 0.5 }); } 
+                if (len < 8) { 
+                    let bloomDensity = isFullBloom ? 12 : 5; 
+                    for (let i = 0; i < bloomDensity; i++) { 
+                        treeCtx.beginPath(); treeCtx.fillStyle = i % 2 === 0 ? "rgba(255, 192, 203, 0.95)" : "rgba(255, 143, 163, 0.95)"; 
+                        let offsetX = Math.random() * 24 - 12; let offsetY = -len + (Math.random() * 24 - 12); 
+                        treeCtx.arc(offsetX, offsetY, Math.random() * 5 + 4 , 0, Math.PI * 2); treeCtx.fill(); 
+                    } 
+                    treeCtx.restore(); return; 
+                } 
+                drawBranch(0, -len, len * 0.75, angle + (Math.random() * 15 + 12), branchWidth * 0.72); 
+                drawBranch(0, -len, len * 0.75, angle - (Math.random() * 15 + 12), branchWidth * 0.72); treeCtx.restore(); 
+            } 
+            drawBranch(treeCanvas.width / 2, treeCanvas.height - 290, treeCanvas.height * 0.17, 0, 15); 
+        }
+        
+        // 🛠️ 核心重构：自右上向左下倾斜飘落的落花引擎
+        function initPetalRainEngine() { 
+            petalCanvas = document.getElementById('petal-canvas'); 
+            petalCtx = petalCanvas.getContext('2d'); 
+            petalCanvas.width = window.innerWidth; 
+            petalCanvas.height = window.innerHeight; 
+            petalsArray = []; 
+            // 初始生成一波
+            generateSinglePetal(25); 
+            loopPetalsEngine(); 
+        }
+
+        function generateSinglePetal(count) { 
+            for(let i=0; i<count; i++) { 
+                // 🛠️ 限制诞生区域：只在屏幕中右侧树冠上方及内部诞生（防止左侧平白无故出花瓣）
+                let spawnX = (window.innerWidth * 0.45) + (Math.random() * window.innerWidth * 0.5); 
+                // 让一部分花瓣从最顶端落入，一部分直接在树冠中间（Y轴10%~45%之间）出生，显得更有层次
+                let spawnY = Math.random() * (window.innerHeight * 0.45) - 30; 
+
+                petalsArray.push({ 
+                    x: spawnX, 
+                    y: spawnY, 
+                    size: Math.random() * 3.5 + 2, 
+                    speedY: Math.random() * 0.7 + 0.6,       // 向下的重力速度
+                    speedX: -(Math.random() * 0.9 + 0.8),    // 🛠️ 锁死为负数：强制所有花瓣产生横向往左飘的推力
+                    opacity: Math.random() * 0.4 + 0.5, 
+                    swingRange: Math.random() * 15 + 10, 
+                    swingSpeed: Math.random() * 0.02 + 0.01 
+                }); 
+            } 
+        }
+
+        function loopPetalsEngine() { 
+            petalCtx.clearRect(0, 0, petalCanvas.width, petalCanvas.height); 
+            let randomProbability = isFullBloom ? 0.4 : 0.07; 
+            if (Math.random() < randomProbability) { 
+                generateSinglePetal(1); 
+            } 
+            
+            petalsArray.forEach((p, index) => { 
+                // 🛠️ 物理轨迹联动：Y轴向下，X轴向左，形成完美的右上到左下抛物线
+                p.y += p.speedY; 
+                p.x += p.speedX + Math.sin(p.y * p.swingSpeed) * 0.15; // 叠加微弱的空气阻力摆动
+                
+                petalCtx.beginPath(); 
+                petalCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); 
+                petalCtx.fillStyle = `rgba(255, 143, 163, ${p.opacity})`; 
+                petalCtx.fill(); 
+                
+                // 边界回收条件：跑出屏幕底部或者完全移出屏幕左侧时，从数组安全移除
+                if(p.y > petalCanvas.height || p.x < -20) { 
+                    petalsArray.splice(index, 1); 
+                } 
+            }); 
+            requestAnimationFrame(loopPetalsEngine); 
+        }
+        
+        function hangWishTag() { 
+            const input = document.getElementById('g-1'); const contentText = input.value.trim(); if(!contentText) return; input.setAttribute('disabled', 'true'); 
+            const streamer = document.getElementById('wish-streamer'); streamer.classList.remove('fly-active'); void streamer.offsetWidth; streamer.classList.add('fly-active'); 
+            
+            setTimeout(() => { 
+                let targetX = window.innerWidth * 0.5;
+                let targetY = window.innerHeight * 0.4;
+
+                if (usingCustomImage) {
+                    // 精准对齐你提供的新素材猫咪大树图的树枝主骨架坐标范围（完美咬合不乱飘）
+                    const pcFixedAnchors = [
+                        { x: 0.54, y: 0.32 }, // 右侧核心繁花枝
+                        { x: 0.46, y: 0.35 }, // 左侧核心分叉点
+                        { x: 0.62, y: 0.28 }, // 右上方高处梢
+                        { x: 0.49, y: 0.25 }, // 正中央顶层花簇
+                        { x: 0.38, y: 0.40 }, // 左侧舒展侧树枝
+                        { x: 0.58, y: 0.42 }  // 右下侧压低的主枝
+                    ];
+                    const luckyAnchor = pcFixedAnchors[Math.floor(Math.random() * pcFixedAnchors.length)];
+                    targetX = window.innerWidth * luckyAnchor.x;
+                    targetY = window.innerHeight * luckyAnchor.y;
+                } else {
+                    if (branchNodes.length > 0) { 
+                        let randomNode = branchNodes[Math.floor(Math.random() * branchNodes.length)]; 
+                        targetX = randomNode.x; targetY = randomNode.y;
+                    } 
+                }
+
+                const newTagData = { id: 'wish-tag-' + Date.now(), text: contentText, x: targetX, y: targetY }; wishTagsList.push(newTagData); 
+                const tagDOM = document.createElement('div'); tagDOM.className = 'tree-wish-tag'; tagDOM.id = newTagData.id; tagDOM.style.left = (newTagData.x - 12) + 'px'; tagDOM.style.top = (newTagData.y) + 'px'; 
+                tagDOM.onclick = function(e) { e.stopPropagation(); openWishPopup(newTagData.text); }; 
+                tagDOM.innerHTML = `<div class="tag-string">📌</div><div class="tag-body"><span>✨</span></div>`; document.getElementById('wish-tags-container').appendChild(tagDOM); 
+                
+                setTimeout(() => { tagDOM.classList.add('tag-hanged-active'); }, 20); 
+                isFullBloom = true; buildPeachTreeWithGrass(); generateSinglePetal(30); input.removeAttribute('disabled'); input.value = ''; input.focus(); 
+                const nextBtn = document.getElementById('next-btn-1'); nextBtn.removeAttribute('disabled'); nextBtn.classList.remove('disabled'); 
+            }, 400); 
+        }
+        function openWishPopup(text) { const popup = document.getElementById('reveal-popup'); document.getElementById('reveal-text').innerText = text; popup.classList.add('pop-active'); }
+        function closeWishPopup(e) { if(e) e.stopPropagation(); document.getElementById('reveal-popup').classList.remove('pop-active'); }
+        document.getElementById('stage-wrapper').onclick = function() { closeWishPopup(null); };
+
+        const events = ["去吃个冰淇淋", "去听一首纯音乐", "闭上眼睛发呆五分钟", "舒服地伸个大懒腰", "拉开窗帘晒晒太阳", "抬头看看天空的云朵", "去对路边的流浪猫招手", "慢慢喝下一杯温热的水", "用手机拍一张身边的风景", "下楼为自己买一束花", "闭上双眼进行正念冥想", "舒舒服服洗个热水澡"];
+        
+        let isSpinning = false; let currentDegree = 0;
+        function spinTheWheel() { 
+            if(isSpinning) return; 
+            isSpinning = true; 
+            const wheel = document.getElementById('wheel-plate'); 
+            const randomIndex = Math.floor(Math.random() * 12); 
+            const targetSectorDeg = randomIndex * 30; 
+            const totalRotateDeg = currentDegree + 1800 + (360 - targetSectorDeg); 
+            currentDegree = totalRotateDeg; 
+            wheel.style.transform = `rotate(${totalRotateDeg}deg)`; 
+            
+            setTimeout(() => { 
+                document.getElementById('todo-title').innerText = events[randomIndex]; 
+                document.getElementById('result-popup').classList.add('show'); 
+                isSpinning = false; 
+            }, 4200); 
+        }
+        
+        window.addEventListener('resize', () => { buildPeachTreeWithGrass(); if(petalCanvas) { petalCanvas.width = window.innerWidth; petalCanvas.height = window.innerHeight; } });
+    </script>
+</body>
+</html>

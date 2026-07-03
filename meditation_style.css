@@ -4,7 +4,7 @@
     --particles-total-count: 120;          
 
     /* 🌊 1. 【潮汐之岛】 */
-    --wave-audio-src: "海浪.mp3";          
+    --wave-audio-src: "潮汐.mp3";          
     --wave-bg-custom-image: url("潮汐.jpg"); 
     --wave-bg-gradient: none; 
     --wave-wave-speed-step: 0.28;          

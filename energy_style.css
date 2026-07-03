@@ -3,7 +3,7 @@
        🖼️ 【大树素材一键替换中心】
        ======================================================== */
     /* 💡 后期你想换成你自己的桃花树图，直接在这改文件名（如 url("素材/tree.png")），下面的 none 记得保留引号 */
-    --pc-custom-tree-image: url("素材/桃花树.jpg"); 
+    --pc-custom-tree-image: url("桃花树.jpg"); 
 
     --sc1-sky-bg: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 65%, #fef08a 100%);
     --c1: #a7f3d0; --c2: #bae6fd; --c3: #fef08a; --c4: #fbcfe8;

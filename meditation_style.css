@@ -18,8 +18,8 @@
     --wave-ring-layer-7: rgba(224, 242, 254, Opacity);
 
     /* 🔥 2. 【篝火之岛】 */
-    --fire-audio-src: "素材/篝火.mp3";          
-    --fire-bg-custom-image: url("素材/篝火.jpg"); 
+    --fire-audio-src: "篝火.mp3";          
+    --fire-bg-custom-image: url("篝火.jpg"); 
     --fire-bg-gradient: none; 
     --fire-wave-speed-step: 0.28;          
     --fire-particles-color-base: rgba(249, 115, 22, Opacity);
@@ -32,8 +32,8 @@
     --fire-ring-layer-7: rgba(255, 247, 237, Opacity);
 
     /* 🍃 3. 【避雨之岛】 */
-    --rain-audio-src: "素材/听雨.mp3";          
-    --rain-bg-custom-image: url("素材/听雨.jpg"); 
+    --rain-audio-src: "听雨.mp3";          
+    --rain-bg-custom-image: url("听雨.jpg"); 
     --rain-bg-gradient: none; 
     --rain-wave-speed-step: 0.25;          
     --rain-particles-color-base: rgba(34, 197, 94, Opacity);
@@ -46,8 +46,8 @@
     --rain-ring-layer-7: rgba(220, 252, 231, Opacity);
 
     /* 🪐 4. 【颂钵之岛】 */
-    --bowl-audio-src: "素材/钵体.mp3";          
-    --bowl-bg-custom-image: url("素材/钵体.jpg"); 
+    --bowl-audio-src: "钵体.mp3";          
+    --bowl-bg-custom-image: url("钵体.jpg"); 
     --bowl-bg-gradient: none; 
     --bowl-wave-speed-step: 0.22;          
     --bowl-particles-color-base: rgba(168, 85, 247, Opacity);
